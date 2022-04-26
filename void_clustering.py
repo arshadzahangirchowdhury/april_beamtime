@@ -25,6 +25,10 @@ import plotly.express as px
 
 
 import random
+import datetime
+import math
+
+
 
 
 
@@ -49,7 +53,7 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
     # import void_clustering
     # from void_clustering import *
 
-    # size = 1000
+    # size = 500
     # features = np.empty((size,3))
     # for idx in range(size):
     #     features[idx][0]=float(random.randint(-100, 100))
@@ -69,6 +73,11 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
     # #     ("OPTICS", OPTICS(min_samples=10, cluster_method='xi')),
     # ],
     #                               keep_core_voids_only = True, visualizer = True)
+    
+    # count and rank best 3 core voids
+    # rank_voids_spherical(core_voids_coordinates,features,15)
+    # rank_voids_elliptical(core_voids_coordinates,features,15,18,23)
+  
     
     Returns
     ----------
@@ -107,8 +116,14 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
         
 
         fig = plt.figure(fignum, figsize=(4, 3))
-
+        t_start = datetime.datetime.now()
         est.fit(df.to_numpy())
+        t_end = datetime.datetime.now()
+        delta = t_end - t_start
+        Time_elapsed=delta.total_seconds()
+
+        print('Time elaspsed (s): ', Time_elapsed) #
+        
         labels = est.labels_
         core_voids_indices = est.core_sample_indices_  #dbscan only
         core_voids_coordinates = est.components_  #dbscan only
@@ -170,6 +185,8 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
         # get sorted core void indices here and select top 5 via np.argsort
         
         return core_voids_indices,core_voids_coordinates
+
+    
 def n_voids_in_sphere(core_void_coord, features, thresh_dist):
     '''
     Finds voids in and on sphere with radius of thres_dist
@@ -188,4 +205,40 @@ def n_voids_in_ellipsoid(core_void_coord, features, a,b,c):
     distance = np.sqrt(np.sum((features/np.array([a,b,c]) - core_void_coord/np.array([a,b,c]))**2, axis = 1))
     
     
-    return np.sum(distance <= 1)
+    return np.sum(distance <= 1)    
+
+def rank_voids_spherical(core_voids_coordinates,features,thresh_dist):
+    '''
+    Rank 3 core voids which have most points inside a sphere.
+    '''
+
+    inside_pts_list = []
+    for core_void_coordinate in core_voids_coordinates:
+        n_inside = n_voids_in_sphere(core_void_coordinate, features, thresh_dist)
+        inside_pts_list.append(n_inside)
+#         print(f'core {core_void_coordinate}; n within spherical core {n_inside}')
+
+    # return the coordinates of the top three core voids that contain the highest tiny voids in an ellipsoid/sphere
+#     import pdb;pdb.set_trace()
+    rank_one_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1]]
+    rank_two_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-2]]
+    rank_three_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-3]]
+    return np.array([rank_one_inside,rank_two_inside,rank_three_inside])
+
+
+def rank_voids_elliptical(core_voids_coordinates,features,a,b,c):
+    '''
+    Rank 3 core voids which have most points inside a ellipsoid.
+    '''
+
+    inside_pts_list = []
+    for core_void_coordinate in core_voids_coordinates:
+        n_inside = n_voids_in_ellipsoid(core_void_coordinate, features,a,b,c)
+        inside_pts_list.append(n_inside)
+#         print(f'core {core_void_coordinate}; n within ellipical core {n_inside}')
+
+    # return the coordinates of the top three core voids that contain the highest tiny voids in an ellipsoid/sphere
+    rank_one_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1]]
+    rank_two_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-2]]
+    rank_three_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-3]]
+    return np.array([rank_one_inside,rank_two_inside,rank_three_inside])
