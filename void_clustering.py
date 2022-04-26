@@ -170,3 +170,22 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
         # get sorted core void indices here and select top 5 via np.argsort
         
         return core_voids_indices,core_voids_coordinates
+def n_voids_in_sphere(core_void_coord, features, thresh_dist):
+    '''
+    Finds voids in and on sphere with radius of thres_dist
+    '''
+    
+    distance = np.sqrt(np.sum((features - core_void_coord)**2, axis = 1))
+    
+    return np.sum(distance <= thresh_dist)
+
+def n_voids_in_ellipsoid(core_void_coord, features, a,b,c):
+    '''
+    Finds voids in and on ellipsoid with a,b,c parameters of ellipsoid equation (x/a)**2 + (y/a)**2 + (z/c)**2 =1
+    '''
+    
+    
+    distance = np.sqrt(np.sum((features/np.array([a,b,c]) - core_void_coord/np.array([a,b,c]))**2, axis = 1))
+    
+    
+    return np.sum(distance <= 1)
