@@ -28,7 +28,7 @@ import random
 
 
 
-def find_core_voids(features,estimators, keep_core_voids_only = True):
+def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer = True):
     '''
     Function to cluster all voids using their x,y,z center coordinates.
     For DBSCAN, adjust eps based on elbow of reachability plot.
@@ -46,27 +46,29 @@ def find_core_voids(features,estimators, keep_core_voids_only = True):
         
     example usage (uncomment the following and use it)
 
-    size = 1000
-    features = np.empty((size,3))
-    for idx in range(size):
-        features[idx][0]=random.randint(-100, 100)
-        features[idx][1]=random.randint(-100, 100)
-        features[idx][2]=random.randint(-100, 100)
+    # import void_clustering
+    # from void_clustering import *
 
-    print(features.shape)
+    # size = 1000
+    # features = np.empty((size,3))
+    # for idx in range(size):
+    #     features[idx][0]=float(random.randint(-100, 100))
+    #     features[idx][1]=float(random.randint(-100, 100))
+    #     features[idx][2]=float(random.randint(-100, 100))
 
-    df= pd.DataFrame()
-    df['x']=features[:,0]
-    df['y']=features[:,1]
-    df['z']=features[:,2]
+    # print(features.shape)
 
+    # df= pd.DataFrame()
+    # df['x']=features[:,0]
+    # df['y']=features[:,1]
+    # df['z']=features[:,2]
 
-    find_high_density_small_voids(features, 
-                                  estimators = [
-        ("DBSCAN", DBSCAN(eps=17,min_samples=5)),
-       # ("OPTICS", OPTICS(min_samples=10, cluster_method='xi')),
-    ],
-                                  keep_core_voids_only = True)
+    # core_voids_indices,core_voids_coordinates = find_core_voids(features, 
+    #                               estimators = [
+    #     ("DBSCAN", DBSCAN(eps=17,min_samples=5)),
+    # #     ("OPTICS", OPTICS(min_samples=10, cluster_method='xi')),
+    # ],
+    #                               keep_core_voids_only = True, visualizer = True)
     
     Returns
     ----------
@@ -93,6 +95,11 @@ def find_core_voids(features,estimators, keep_core_voids_only = True):
     plt.plot(distances)
     plt.title('Reachability (sorted distances to closest neighbor)')
     plt.ylabel('distances');
+    if visualizer == True: 
+        plt.show()
+    else:
+        plt.close()
+        
     plt.savefig('figure' + '_reachability' +'.jpg')
     
 
@@ -123,7 +130,7 @@ def find_core_voids(features,estimators, keep_core_voids_only = True):
 
 
         fig = px.scatter_3d(secondarydf, x='x', y='y', z='z', size_max=15,
-                      color='labels', template='simple_white',width=600, height=600)
+                      color='labels', template='simple_white',width=600, height=600);
 
 
         fig.update_traces(marker_size = 4)
@@ -133,7 +140,7 @@ def find_core_voids(features,estimators, keep_core_voids_only = True):
                             yaxis_title='y',
                             zaxis_title='z'),
                           title=name
-                            )
+                            );
 
 
         fig.update_layout(
@@ -147,11 +154,13 @@ def find_core_voids(features,estimators, keep_core_voids_only = True):
                     color="black"
                 ),
             )
-        )
+        );
 
 
-
-        fig.show()
+        if visualizer == True:   
+            fig.show()
+        else:
+            plt.close()
         fig.write_image('figure' + str(fignum) +'.jpg')
 
 
