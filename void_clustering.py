@@ -1,9 +1,25 @@
+from sklearn import cluster
+from sklearn.cluster import KMeans, DBSCAN, OPTICS
+import numpy as np
+from matplotlib import pyplot as plt
+
+from sklearn.neighbors import kneighbors_graph
+from sklearn.neighbors import NearestNeighbors
+
+import time
+import warnings
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import seaborn as sns
+import pandas as pd
+import plotly.express as px
 
 
-estimators = [
-#     ("DBSCAN", DBSCAN(eps=42,min_samples=5)),
-    ("OPTICS", OPTICS(min_samples=10, cluster_method='xi')),
-]
+import random
+
+
 
 def find_high_density_small_voids(features,estimators, keep_high_density_voids_only = True):
     '''
@@ -22,7 +38,7 @@ def find_high_density_small_voids(features,estimators, keep_high_density_voids_o
     '''
     fignum = 1
     
-
+    
     df= pd.DataFrame()
     df['x']=features[:,0]
     df['y']=features[:,1]
@@ -39,7 +55,7 @@ def find_high_density_small_voids(features,estimators, keep_high_density_voids_o
     plt.plot(distances)
     plt.title('Reachability (sorted distances to closest neighbor)')
     plt.ylabel('distances');
-    fig.write_image('figure' + '_reachability' +'.jpg')
+    plt.savefig('figure' + '_reachability' +'.jpg')
     
 
     for name, est in estimators:
@@ -103,5 +119,26 @@ def find_high_density_small_voids(features,estimators, keep_high_density_voids_o
 
         fignum = fignum + 1
 
+# example usage (uncomment the following and use it)
+
+# size = 10000
+# features = np.empty((size,3))
+# for idx in range(size):
+#     features[idx][0]=random.randint(-100, 100)
+#     features[idx][1]=random.randint(-100, 100)
+#     features[idx][2]=random.randint(-100, 100)
+    
+# print(features.shape)
+
+# df= pd.DataFrame()
+# df['x']=features[:,0]
+# df['y']=features[:,1]
+# df['z']=features[:,2]
 
 
+find_high_density_small_voids(features, 
+                              estimators = [
+    ("DBSCAN", DBSCAN(eps=8,min_samples=5)),
+    ("OPTICS", OPTICS(min_samples=10, cluster_method='xi')),
+],
+                              keep_high_density_voids_only = True)
