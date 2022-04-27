@@ -49,24 +49,19 @@ def find_core_voids(features,estimators, keep_core_voids_only = True, visualizer
         
         
     example usage (uncomment the following and use it)
-
     # import void_clustering
     # from void_clustering import *
-
     # size = 500
     # features = np.empty((size,3))
     # for idx in range(size):
     #     features[idx][0]=float(random.randint(-100, 100))
     #     features[idx][1]=float(random.randint(-100, 100))
     #     features[idx][2]=float(random.randint(-100, 100))
-
     # print(features.shape)
-
     # df= pd.DataFrame()
     # df['x']=features[:,0]
     # df['y']=features[:,1]
     # df['z']=features[:,2]
-
     # core_voids_indices,core_voids_coordinates = find_core_voids(features, 
     #                               estimators = [
     #     ("DBSCAN", DBSCAN(eps=17,min_samples=5)),
@@ -207,9 +202,9 @@ def n_voids_in_ellipsoid(core_void_coord, features, a,b,c):
     
     return np.sum(distance <= 1)    
 
-def rank_voids_spherical(core_voids_coordinates,features,thresh_dist):
+def rank_voids_spherical(core_voids_coordinates,features,thresh_dist, n_roi=3):
     '''
-    Rank 3 core voids which have most points inside a sphere.
+    Rank n_roi core voids which have most points inside a sphere.n_roi must not exceed the number of core_voids found.
     '''
 
     inside_pts_list = []
@@ -220,15 +215,19 @@ def rank_voids_spherical(core_voids_coordinates,features,thresh_dist):
 
     # return the coordinates of the top three core voids that contain the highest tiny voids in an ellipsoid/sphere
 #     import pdb;pdb.set_trace()
-    rank_one_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1]]
-    rank_two_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-2]]
-    rank_three_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-3]]
-    return np.array([rank_one_inside,rank_two_inside,rank_three_inside])
+#     rank_one_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1]]
+#     rank_two_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-2]]
+#     rank_three_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-3]]
+    ranked_cell_list = []
+    for idx in range(n_roi):
+        ranked_cell = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1-idx]]
+        ranked_cell_list.append(ranked_cell)
+    return np.array(ranked_cell_list)
 
 
-def rank_voids_elliptical(core_voids_coordinates,features,a,b,c):
+def rank_voids_elliptical(core_voids_coordinates,features,a,b,c, n_roi = 3):
     '''
-    Rank 3 core voids which have most points inside a ellipsoid.
+    Rank n_roi core voids which have most points inside a ellipsoid.n_roi must not exceed the number of core_voids found.
     '''
 
     inside_pts_list = []
@@ -238,7 +237,8 @@ def rank_voids_elliptical(core_voids_coordinates,features,a,b,c):
 #         print(f'core {core_void_coordinate}; n within ellipical core {n_inside}')
 
     # return the coordinates of the top three core voids that contain the highest tiny voids in an ellipsoid/sphere
-    rank_one_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1]]
-    rank_two_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-2]]
-    rank_three_inside = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-3]]
-    return np.array([rank_one_inside,rank_two_inside,rank_three_inside])
+    ranked_cell_list = []
+    for idx in range(n_roi):
+        ranked_cell = core_voids_coordinates[np.argsort(np.array(inside_pts_list))[-1-idx]]
+        ranked_cell_list.append(ranked_cell)
+    return np.array(ranked_cell_list)
